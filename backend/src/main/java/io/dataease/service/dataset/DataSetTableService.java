@@ -2276,6 +2276,7 @@ public class DataSetTableService {
         datasourceRequest.setDatasource(engine);
         QueryProvider qp = ProviderFactory.getQueryProvider(engine.getType());
         datasourceRequest.setQuery(qp.searchTable(TableUtils.tableName(id)));
+        assert jdbcProvider != null;
         List<String[]> data = jdbcProvider.getData(datasourceRequest);
         return CollectionUtils.isNotEmpty(data);
     }

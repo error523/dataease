@@ -2,27 +2,27 @@
 -- Table structure for sys_msg
 -- ----------------------------
 CREATE TABLE `sys_msg` (
-  `msg_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '消息主键',
-  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
-  `type_id` bigint(20) NOT NULL COMMENT '类型',
-  `status` tinyint(1) NOT NULL COMMENT '状态',
-  `param` varchar(255) DEFAULT NULL COMMENT '路由参数',
-  `create_time` bigint(13) NOT NULL COMMENT '发送时间',
-  `read_time` bigint(13) DEFAULT NULL COMMENT '读取时间',
-  `content` varchar(255) DEFAULT NULL COMMENT '消息内容',
-  PRIMARY KEY (`msg_id`) USING BTREE,
-  KEY `inx_msg_userid` (`user_id`) USING BTREE,
-  KEY `inx_msg_type` (`type_id`) USING BTREE,
-  KEY `inx_msg_status` (`status`) USING BTREE
+                           `msg_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '消息主键',
+                           `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+                           `type_id` bigint(20) NOT NULL COMMENT '类型',
+                           `status` tinyint(1) NOT NULL COMMENT '状态',
+                           `param` varchar(255) DEFAULT NULL COMMENT '路由参数',
+                           `create_time` bigint(13) NOT NULL COMMENT '发送时间',
+                           `read_time` bigint(13) DEFAULT NULL COMMENT '读取时间',
+                           `content` varchar(255) DEFAULT NULL COMMENT '消息内容',
+                           PRIMARY KEY (`msg_id`) USING BTREE,
+                           KEY `inx_msg_userid` (`user_id`) USING BTREE,
+                           KEY `inx_msg_type` (`type_id`) USING BTREE,
+                           KEY `inx_msg_status` (`status`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci COMMENT='消息通知表';
 
 -- ----------------------------
 -- Table structure for sys_msg_channel
 -- ----------------------------
 CREATE TABLE `sys_msg_channel` (
-  `msg_channel_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `channel_name` varchar(255) DEFAULT NULL COMMENT '渠道名称',
-  PRIMARY KEY (`msg_channel_id`) USING BTREE
+                                   `msg_channel_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+                                   `channel_name` varchar(255) DEFAULT NULL COMMENT '渠道名称',
+                                   PRIMARY KEY (`msg_channel_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci AUTO_INCREMENT=4 COMMENT='消息渠道表';
 
 -- ----------------------------
@@ -37,13 +37,13 @@ COMMIT;
 -- Table structure for sys_msg_type
 -- ----------------------------
 CREATE TABLE `sys_msg_type` (
-  `msg_type_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `pid` bigint(20) NOT NULL COMMENT '父类ID',
-  `type_name` varchar(255) DEFAULT NULL COMMENT '类型名称',
-  `router` varchar(255) DEFAULT NULL COMMENT '跳转路由',
-  `callback` varchar(255) DEFAULT NULL COMMENT '回调方法',
-  PRIMARY KEY (`msg_type_id`) USING BTREE,
-  KEY `inx_msgtype_pid` (`pid`) USING BTREE
+                                `msg_type_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+                                `pid` bigint(20) NOT NULL COMMENT '父类ID',
+                                `type_name` varchar(255) DEFAULT NULL COMMENT '类型名称',
+                                `router` varchar(255) DEFAULT NULL COMMENT '跳转路由',
+                                `callback` varchar(255) DEFAULT NULL COMMENT '回调方法',
+                                PRIMARY KEY (`msg_type_id`) USING BTREE,
+                                KEY `inx_msgtype_pid` (`pid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci AUTO_INCREMENT=7 COMMENT='消息类型表';
 
 -- ----------------------------
@@ -62,12 +62,12 @@ COMMIT;
 -- Table structure for sys_msg_setting
 -- ----------------------------
 CREATE TABLE `sys_msg_setting` (
-  `msg_setting_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
-  `type_id` bigint(20) NOT NULL COMMENT '类型ID',
-  `channel_id` bigint(20) NOT NULL COMMENT '渠道ID',
-  `enable` tinyint(1) DEFAULT NULL COMMENT '是否启用',
-  PRIMARY KEY (`msg_setting_id`) USING BTREE
+                                   `msg_setting_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+                                   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+                                   `type_id` bigint(20) NOT NULL COMMENT '类型ID',
+                                   `channel_id` bigint(20) NOT NULL COMMENT '渠道ID',
+                                   `enable` tinyint(1) DEFAULT NULL COMMENT '是否启用',
+                                   PRIMARY KEY (`msg_setting_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci AUTO_INCREMENT=1 COMMENT='消息设置表';
 
 BEGIN;
@@ -81,4 +81,3 @@ COMMIT;
 BEGIN;
 UPDATE `sys_menu` SET permission = null WHERE menu_id = 1;
 COMMIT;
-

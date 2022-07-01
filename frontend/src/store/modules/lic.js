@@ -25,9 +25,11 @@ const actions = {
   getLicInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       validateLic().then(response => {
+        console.log(response);
         const { data } = response
         if (data && data.status && data.status === 'no_record') {
-          commit('SET_VALIDATE', false)
+          // TODO SKIP？
+          commit('SET_VALIDATE', true)
           commit('SET_LIC_MSG', data.message)
           commit('SET_LIC_STATUS', data.status)
         } else {

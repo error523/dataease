@@ -680,12 +680,17 @@ public class JdbcProvider extends DefaultJdbcProvider {
 
     @Override
     public String getSchemaSql(DatasourceRequest datasourceRequest) {
+        String desc = datasourceRequest.getDatasource().getDesc();
         DatasourceTypes datasourceType = DatasourceTypes.valueOf(datasourceRequest.getDatasource().getType());
         Db2Configuration db2Configuration = new Gson().fromJson(datasourceRequest.getDatasource().getConfiguration(), Db2Configuration.class);
         switch (datasourceType) {
             case oracle:
                 return "select * from all_users";
             case sqlServer:
+                // TODO 兼容sqlserver 2000
+                if("SQLServer2000".equals(desc)) {
+                    return "SELECT DISTINCT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA;";
+                }
                 return "select name from sys.schemas;";
             case db2:
                 return "select SCHEMANAME from syscat.SCHEMATA   WHERE \"DEFINER\" ='USER'".replace("USER", db2Configuration.getUsername().toUpperCase());

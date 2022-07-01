@@ -1,7 +1,7 @@
 <template>
   <div class="top-nav">
     <div v-loading="!axiosFinished" class="log">
-      <svg-icon v-if="!logoUrl && axiosFinished" icon-class="DataEase" custom-class="top-nav-logo-icon" />
+      <svg-icon v-if="!logoUrl && axiosFinished" icon-class="DataEase" custom-class="top-nav-logo-icon"/>
       <img v-if="logoUrl && axiosFinished" :src="logoUrl" width="140" alt="" style="padding-top: 10px;">
     </div>
     <el-menu
@@ -15,7 +15,8 @@
       <div v-for="item in permission_routes" :key="item.path" class="nav-item">
         <app-link :to="resolvePath(item)">
           <el-menu-item v-if="!item.hidden" :index="item.path">
-            {{ item.meta ? item.meta.title : item.children[0].meta.title }}</el-menu-item>
+            {{ item.meta ? item.meta.title : item.children[0].meta.title }}
+          </el-menu-item>
         </app-link>
       </div>
     </el-menu>
@@ -23,15 +24,15 @@
     <div class="right-menu" style="color: var(--TopTextColor)">
       <template>
 
-        <notification class="right-menu-item hover-effect" />
-        <lang-select class="right-menu-item hover-effect" />
+        <notification class="right-menu-item hover-effect"/>
+        <lang-select class="right-menu-item hover-effect"/>
         <div style="height: 100%;padding: 0 8px;" class="right-menu-item hover-effect">
           <a
             :href="helpLink"
             target="_blank"
             style="display: flex;height: 100%;width: 100%;justify-content: center;align-items: center;"
           >
-            <svg-icon icon-class="docs" />
+            <svg-icon icon-class="docs"/>
           </a>
         </div>
       </template>
@@ -45,7 +46,7 @@
         <div class="el-dropdown-link" style="display: flex;color: var(--TopTextColor);font-size: 14px; width:100%;">
 
           <span style="max-width:80px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">{{ name }}</span>
-          <span><i class="el-icon-arrow-down el-icon--right" /></span>
+          <span><i class="el-icon-arrow-down el-icon--right"/></span>
         </div>
         <el-dropdown-menu slot="dropdown">
           <router-link to="/person-info/index">
@@ -95,6 +96,7 @@ import {
 import {
   initTheme
 } from '@/utils/ThemeUtil'
+
 export default {
   name: 'Topbar',
   components: {
@@ -250,9 +252,9 @@ export default {
       // 如果有子项，默认跳转第一个子项路由
       let path = ''
       /**
-         * item 路由子项
-         * parent 路由父项
-         */
+       * item 路由子项
+       * parent 路由父项
+       */
       const getDefaultPath = (item, parent) => {
         // 如果path是个外部链接（不建议），直接返回链接，存在个问题：如果是外部链接点击跳转后当前页内容还是上一个路由内容
         if (isExternal(item.path)) {
@@ -347,28 +349,28 @@ export default {
 
 </script>
 <style lang="scss" scoped>
-  .el-dropdown-link {
-    cursor: pointer;
-    color: #1e212a;
-  }
+.el-dropdown-link {
+  cursor: pointer;
+  color: #1e212a;
+}
 
-  .el-icon-arrow-down {
-    font-size: 12px;
-  }
+.el-icon-arrow-down {
+  font-size: 12px;
+}
 
-  .top-dropdown {
-    display: inline-block;
-    padding: 10px 8px;
-    height: 100%;
-    font-size: 16px;
-    color: #1e212a;
-    vertical-align: text-bottom;
-    margin-right: 10px;
-  }
+.top-dropdown {
+  display: inline-block;
+  padding: 10px 8px;
+  height: 100%;
+  font-size: 16px;
+  color: #1e212a;
+  vertical-align: text-bottom;
+  margin-right: 10px;
+}
 
-  .de-top-menu {
-    background-color: var(--MainBG);
+.de-top-menu {
+  background-color: var(--MainBG);
 
-  }
+}
 
 </style>

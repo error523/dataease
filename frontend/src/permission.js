@@ -44,6 +44,7 @@ router.beforeEach(async(to, from, next) => {
   // determine whether the user has logged in
   const hasToken = getToken()
   if (hasToken) {
+    console.log("user has token", hasToken)
     if (to.path === '/login') {
       // if is logged in, redirect to the home page
       next({
@@ -97,6 +98,7 @@ router.beforeEach(async(to, from, next) => {
     }
   }
 })
+
 export const loadMenus = (next, to) => {
   buildMenus().then(res => {
     const datas = res.data
@@ -118,7 +120,7 @@ export const loadMenus = (next, to) => {
         hidden: true
       })
     }
-
+    console.log(asyncRouter);
     asyncRouter.push({
       path: '*',
       redirect: '/404',
@@ -192,9 +194,9 @@ const hasPermission = (router, user_permissions) => {
   if (router.permission && !user_permissions.includes(router.permission)) {
     return false
   }
-  if (!filterLic(router)) {
-    return false
-  }
+  // if (!filterLic(router)) {
+  //   return false
+  // }
   // 如果有字菜单 则 判断是否满足 ‘任意一个子菜单有权限’
   if (router.children && router.children.length) {
     const permissionChilds = router.children.filter(item => hasPermission(item, user_permissions))

@@ -4,6 +4,7 @@ import io.dataease.controller.ResultHolder;
 import io.dataease.i18n.Translator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +31,6 @@ public class GlobalExceptionHandler implements ErrorController {
     @Resource
     private ErrorAttributes errorAttributes;
 
-    @Override
     public String getErrorPath() {
         return PATH;
     }
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler implements ErrorController {
     public ResultHolder error(HttpServletRequest request, HttpServletResponse response) {
         WebRequest webRequest = new ServletWebRequest(request);
         Throwable t = errorAttributes.getError(webRequest);
-        Map<String, Object> errorAttributeMap = errorAttributes.getErrorAttributes(webRequest, true);
+        Map<String, Object> errorAttributeMap = errorAttributes.getErrorAttributes(webRequest, ErrorAttributeOptions.defaults());
         Integer code = (Integer) errorAttributeMap.get("status");
         response.setStatus(code);
         String errorMessage = StringUtils.EMPTY;
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler implements ErrorController {
 
     protected Map<String, Object> getErrorAttributes(HttpServletRequest request, boolean includeStackTrace) {
         WebRequest webRequest = new ServletWebRequest(request);
-        return this.errorAttributes.getErrorAttributes(webRequest, includeStackTrace);
+        return this.errorAttributes.getErrorAttributes(webRequest, ErrorAttributeOptions.defaults());
     }
 
 }

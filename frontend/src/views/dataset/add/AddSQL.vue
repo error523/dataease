@@ -19,7 +19,8 @@
         <el-form :inline="true">
           <el-form-item class="form-item">
             <el-select v-model="dataSource" filterable :placeholder="$t('dataset.pls_slc_data_source')" size="mini"
-                       @change="changeDatasource()">
+                       @change="changeDatasource()"
+            >
               <el-option
                 v-for="item in options"
                 :key="item.id"
@@ -35,7 +36,8 @@
             <el-select v-model="mode" filterable :placeholder="$t('dataset.connect_mode')" size="mini">
               <el-option :label="$t('dataset.direct_connect')" value="0"/>
               <el-option :label="$t('dataset.sync_data')" value="1"
-                         :disabled="disabledSync"/>
+                         :disabled="disabledSync"
+              />
             </el-select>
           </el-form-item>
 
@@ -99,9 +101,9 @@
 </template>
 
 <script>
-import {post, listDatasource, isKettleRunning} from '@/api/dataset/dataset'
-import {codemirror} from 'vue-codemirror'
-import {getTable} from '@/api/dataset/dataset'
+import { post, listDatasource, isKettleRunning } from '@/api/dataset/dataset'
+import { codemirror } from 'vue-codemirror'
+import { getTable } from '@/api/dataset/dataset'
 // 核心样式
 import 'codemirror/lib/codemirror.css'
 // 引入主题后还需要在 options 中指定主题才会生效
@@ -124,11 +126,11 @@ import 'codemirror/keymap/emacs.js'
 import 'codemirror/addon/hint/show-hint.css'
 import 'codemirror/addon/hint/sql-hint'
 import 'codemirror/addon/hint/show-hint'
-import {engineMode} from "@/api/system/engine";
+import { engineMode } from '@/api/system/engine'
 
 export default {
   name: 'AddSQL',
-  components: {codemirror},
+  components: { codemirror },
   props: {
     param: {
       type: Object,
@@ -160,7 +162,7 @@ export default {
       kettleRunning: false,
       selectedDatasource: {},
       engineMode: 'local',
-      disabledSync: true,
+      disabledSync: true
     }
   },
   computed: {
@@ -170,7 +172,7 @@ export default {
   },
   watch: {
     'param.tableId': {
-      handler: function () {
+      handler: function() {
         this.resetComponent()
         this.initTableInfo()
       }
@@ -189,6 +191,7 @@ export default {
     this.initTableInfo()
   },
   created() {
+    debugger
     this.kettleState()
     engineMode().then(res => {
       this.engineMode = res.data
@@ -205,17 +208,17 @@ export default {
         if (this.options[i].id === this.dataSource) {
           this.selectedDatasource = this.options[i]
           this.mode = '0'
-          if (this.engineMode === 'simple' || (!this.kettleRunning || this.selectedDatasource.calculationMode === 'DIRECT' )) {
-            this.disabledSync = true
-          } else {
-            this.disabledSync = false
-          }
+          console.log(this.engineMode)
+          console.log(this.kettleRunning)
+          console.log(this.selectedDatasource.calculationMode)
+          // this.disabledSync = this.engineMode === 'simple' || (!this.kettleRunning || this.selectedDatasource.calculationMode === 'DIRECT')
+          this.disabledSync = false
         }
       }
     },
     calHeight() {
       const that = this
-      setTimeout(function () {
+      setTimeout(function() {
         const currentHeight = document.documentElement.clientHeight
         that.height = currentHeight - 56 - 30 - 26 - 25 - 43 - 160 - 10 - 37 - 20 - 10 - 16
       }, 10)
@@ -253,7 +256,7 @@ export default {
         dataSourceId: this.dataSource,
         type: 'sql',
         // info: '{"sql":"' + this.sql + '"}',
-        info: JSON.stringify({sql: this.sql.trim()})
+        info: JSON.stringify({ sql: this.sql.trim() })
       }).then(response => {
         this.fields = response.data.fields
         this.data = response.data.data
@@ -296,7 +299,7 @@ export default {
         syncType: this.syncType,
         mode: parseInt(this.mode),
         // info: '{"sql":"' + this.sql + '"}',
-        info: JSON.stringify({sql: this.sql.trim()})
+        info: JSON.stringify({ sql: this.sql.trim() })
       }
       post('/dataset/table/update', table).then(response => {
         // this.$store.dispatch('dataset/setSceneData', new Date().getTime())
@@ -308,9 +311,9 @@ export default {
     cancel() {
       // this.dataReset()
       if (this.param.tableId) {
-        this.$emit('switchComponent', {name: 'ViewTable', param: this.param.table})
+        this.$emit('switchComponent', { name: 'ViewTable', param: this.param.table })
       } else {
-        this.$emit('switchComponent', {name: ''})
+        this.$emit('switchComponent', { name: '' })
       }
     },
 
