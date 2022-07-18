@@ -4,6 +4,7 @@ import { DEFAULT_TOTAL } from '@/views/chart/chart/chart'
 import { formatterItem, valueFormatter } from '@/views/chart/chart/formatter'
 
 export function baseTableInfo(s2, container, chart, action, tableData) {
+  console.log(s2, container, chart, action, tableData);
   const containerDom = document.getElementById(container)
 
   // fields

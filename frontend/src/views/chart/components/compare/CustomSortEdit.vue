@@ -9,7 +9,7 @@
       @update="onUpdate"
     >
       <transition-group class="draggable-group">
-        <span v-for="(item,index) in sortList" :key="index" class="item-dimension" :title="item">
+        <span v-for="(item,index) in sortList" :key="`${item}_${getRandom(1, 1000000)}`" class="item-dimension" :title="item">
           <svg-icon icon-class="drag" class="item-icon" />
           <span class="item-span">
             {{ item }}
@@ -23,7 +23,8 @@
 </template>
 
 <script>
-import { post } from '@/api/dataset/dataset'
+import { post } from '@/api/dataset/dataset';
+import _ from 'lodash';
 
 export default {
   name: 'CustomSortEdit',
@@ -65,6 +66,9 @@ export default {
     },
     onUpdate() {
       this.$emit('onSortChange', this.sortList)
+    },
+    getRandom(s, e) {
+      _.random(s, e);
     }
   }
 }
