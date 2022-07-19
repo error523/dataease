@@ -2,6 +2,7 @@ import { TableSheet, S2Event, PivotSheet } from '@antv/s2'
 import { getCustomTheme, getSize } from '@/views/chart/chart/common/common_table'
 import { DEFAULT_TOTAL } from '@/views/chart/chart/chart'
 import { formatterItem, valueFormatter } from '@/views/chart/chart/formatter'
+import _ from 'lodash';
 
 export function baseTableInfo(s2, container, chart, action, tableData) {
   console.log(s2, container, chart, action, tableData);
@@ -124,6 +125,7 @@ export function baseTableInfo(s2, container, chart, action, tableData) {
   if (s2) {
     s2.destroy()
   }
+  console.log(containerDom, s2DataConfig, s2Options);
   s2 = new TableSheet(containerDom, s2DataConfig, s2Options)
 
   // click
@@ -255,23 +257,35 @@ export function baseTableNormal(s2, container, chart, action, tableData) {
   return s2
 }
 
+
+
+
+
 export function baseTablePivot(s2, container, chart, action, tableData) {
   const containerDom = document.getElementById(container)
-
+  console.log(chart);
   // row and column
   const columnFields = JSON.parse(chart.xaxis)
   const rowFields = JSON.parse(chart.xaxisExt)
   const valueFields = JSON.parse(chart.yaxis)
-  const c = []; const r = []; const v = []
+  const c = []; const r = []; const v = []; const s = [];
   columnFields.forEach(ele => {
     c.push(ele.dataeaseName)
   })
   rowFields.forEach(ele => {
     r.push(ele.dataeaseName)
+    if(ele.sort) {
+      s.push( {
+        sortFieldId: ele.dataeaseName,
+        sortMethod: ele.sort
+      });
+    }
   })
   valueFields.forEach(ele => {
     v.push(ele.dataeaseName)
   })
+
+
 
   // fields
   const fields = chart.data.fields
@@ -359,7 +373,9 @@ export function baseTablePivot(s2, container, chart, action, tableData) {
       values: v
     },
     meta: meta,
-    data: tableData
+    data: tableData,
+    // add col sort setting
+    sortParams: s
   }
 
   // total config
@@ -392,6 +408,16 @@ export function baseTablePivot(s2, container, chart, action, tableData) {
   // 开始渲染
   if (s2) {
     s2.destroy()
+  }
+
+  console.log(s2DataConfig);
+  console.log( s2Options);
+  /**
+   * TODO 需求是可以根据当前选择的 数据列维度 进行小计
+   *  这里直接使用固定写法进行判断
+   */
+  if(_.indexOf(s2DataConfig.fields.columns, 'C_948495146facadfe8859789036313d79') > -1) {
+    s2Options.totals.col.subTotalsDimensions = ['C_948495146facadfe8859789036313d79'];
   }
   s2 = new PivotSheet(containerDom, s2DataConfig, s2Options)
 

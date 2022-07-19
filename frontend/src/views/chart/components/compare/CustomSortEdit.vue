@@ -68,7 +68,7 @@ export default {
       this.$emit('onSortChange', this.sortList)
     },
     getRandom(s, e) {
-      _.random(s, e);
+      return _.random(s, e);
     }
   }
 }
