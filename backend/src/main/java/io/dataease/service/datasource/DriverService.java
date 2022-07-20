@@ -6,6 +6,7 @@ import io.dataease.commons.constants.SysLogConstants;
 import io.dataease.commons.utils.BeanUtils;
 import io.dataease.commons.utils.DeFileUtils;
 import io.dataease.commons.utils.DeLogUtils;
+import io.dataease.config.EnvParameters;
 import io.dataease.dto.DriverDTO;
 import io.dataease.dto.SysLogDTO;
 import io.dataease.i18n.Translator;
@@ -43,6 +44,9 @@ public class DriverService {
     @Resource
     private DatasourceService datasourceService;
 
+    @Resource
+    private EnvParameters envParameters;
+
 
     public List<DriverDTO> list() throws Exception {
         List<DriverDTO> driverDTOS = new ArrayList<>();
@@ -63,7 +67,7 @@ public class DriverService {
     public void delete(DeDriver deDriver) {
         for (Datasource datasource : datasourceService.listByType(deDriver.getType())) {
             JdbcConfiguration configuration = new Gson().fromJson(datasource.getConfiguration(), JdbcConfiguration.class);
-            if(StringUtils.isNotEmpty(configuration.getCustomDriver()) && configuration.getCustomDriver().equalsIgnoreCase(deDriver.getId())){
+            if (StringUtils.isNotEmpty(configuration.getCustomDriver()) && configuration.getCustomDriver().equalsIgnoreCase(deDriver.getId())) {
                 throw new RuntimeException(Translator.get("I18N_DRIVER_NOT_DELETE"));
             }
         }
@@ -71,16 +75,17 @@ public class DriverService {
         DeDriverDetailsExample example = new DeDriverDetailsExample();
         example.createCriteria().andDeDriverIdEqualTo(deDriver.getId());
         deDriverDetailsMapper.deleteByExample(example);
-        DeFileUtils.deleteFile(DRIVER_PATH + deDriver.getId() + "/");
+        DeFileUtils.deleteFile(null == envParameters.getRootPath() ?
+                envParameters.getRootPath() : DRIVER_PATH + deDriver.getId() + "/");
     }
 
     public DeDriver save(DeDriver deDriver) {
-        if(StringUtils.isEmpty(deDriver.getName()) || StringUtils.isEmpty(deDriver.getType())){
+        if (StringUtils.isEmpty(deDriver.getName()) || StringUtils.isEmpty(deDriver.getType())) {
             throw new RuntimeException("Name or Type cannot be empty.");
         }
         DeDriverExample example = new DeDriverExample();
         example.createCriteria().andNameEqualTo(deDriver.getName());
-        if(CollectionUtil.isNotEmpty(deDriverMapper.selectByExample(example))){
+        if (CollectionUtil.isNotEmpty(deDriverMapper.selectByExample(example))) {
             throw new RuntimeException(Translator.get("I18N_DRIVER_REPEAT_NAME"));
         }
 
@@ -102,27 +107,29 @@ public class DriverService {
         return deDriverDetailsMapper.selectByExampleWithBLOBs(example);
     }
 
-    public void deleteDriverFile(String driverFileId) throws Exception{
+    public void deleteDriverFile(String driverFileId) throws Exception {
         DeDriverDetails deDriverDetails = deDriverDetailsMapper.selectByPrimaryKey(driverFileId);
         DeDriver deDriver = deDriverMapper.selectByPrimaryKey(deDriverDetails.getDeDriverId());
-        if(deDriver == null){
+        if (deDriver == null) {
             throw new Exception(Translator.get("I18N_DRIVER_NOT_FOUND"));
         }
-        DeFileUtils.deleteFile(DRIVER_PATH + deDriverDetails.getDeDriverId() + "/" + deDriverDetails.getFileName());
+        DeFileUtils.deleteFile(null == envParameters.getRootPath() ?
+                envParameters.getRootPath() : DRIVER_PATH + deDriverDetails.getDeDriverId() + "/" + deDriverDetails.getFileName());
         SysLogDTO sysLogDTO = DeLogUtils.buildLog(SysLogConstants.OPERATE_TYPE.DELETE, SysLogConstants.SOURCE_TYPE.DRIVER_FILE, deDriverDetails.getId(), deDriverDetails.getDeDriverId(), null, null);
         DeLogUtils.save(sysLogDTO);
         deDriverDetailsMapper.deleteByPrimaryKey(driverFileId);
-        DefaultJdbcProvider defaultJdbcProvider = (DefaultJdbcProvider)ProviderFactory.getProvider(deDriver.getType());
+        DefaultJdbcProvider defaultJdbcProvider = (DefaultJdbcProvider) ProviderFactory.getProvider(deDriver.getType());
         defaultJdbcProvider.reloadCustomJdbcClassLoader(deDriver);
     }
 
     public DeDriverDetails saveJar(MultipartFile file, String driverId) throws Exception {
         DeDriver deDriver = deDriverMapper.selectByPrimaryKey(driverId);
-        if(deDriver == null){
+        if (deDriver == null) {
             throw new Exception(Translator.get("I18N_DRIVER_NOT_FOUND"));
         }
         String filename = file.getOriginalFilename();
-        String dirPath = DRIVER_PATH + driverId + "/";
+        String dirPath = null == envParameters.getRootPath() ?
+                envParameters.getRootPath() : DRIVER_PATH + driverId + "/";
         String filePath = dirPath + filename;
 
         saveFile(file, dirPath, filePath);
@@ -145,7 +152,7 @@ public class DriverService {
         deDriverDetailsMapper.insert(deDriverDetails);
         SysLogDTO sysLogDTO = DeLogUtils.buildLog(SysLogConstants.OPERATE_TYPE.UPLOADFILE, SysLogConstants.SOURCE_TYPE.DRIVER_FILE, deDriverDetails.getId(), driverId, null, null);
         DeLogUtils.save(sysLogDTO);
-        DefaultJdbcProvider defaultJdbcProvider = (DefaultJdbcProvider)ProviderFactory.getProvider(deDriver.getType());
+        DefaultJdbcProvider defaultJdbcProvider = (DefaultJdbcProvider) ProviderFactory.getProvider(deDriver.getType());
         defaultJdbcProvider.reloadCustomJdbcClassLoader(deDriver);
         return deDriverDetails;
     }

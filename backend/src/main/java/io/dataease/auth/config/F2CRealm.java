@@ -43,8 +43,7 @@ public class F2CRealm extends AuthorizingRealm {
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         CurrentUserDto userDto = (CurrentUserDto) principals.getPrimaryPrincipal();
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
-        Set<String> role = new HashSet<>(
-                userDto.getRoles().stream().map(item -> (item.getId() + "")).collect(Collectors.toSet()));
+        Set<String> role = userDto.getRoles().stream().map(item -> (item.getId() + "")).collect(Collectors.toSet());
         simpleAuthorizationInfo.addRoles(role);
         Set<String> permission = new HashSet<>(userDto.getPermissions());
         simpleAuthorizationInfo.addStringPermissions(permission);

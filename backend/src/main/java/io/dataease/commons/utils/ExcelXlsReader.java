@@ -7,6 +7,7 @@ import org.apache.poi.hssf.eventusermodel.*;
 import org.apache.poi.hssf.eventusermodel.dummyrecord.LastCellOfRowDummyRecord;
 import org.apache.poi.hssf.eventusermodel.dummyrecord.MissingCellDummyRecord;
 import org.apache.poi.hssf.record.*;
+import org.apache.poi.hssf.record.Record;
 import org.apache.poi.hssf.usermodel.HSSFDataFormatter;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -372,9 +373,9 @@ public class ExcelXlsReader implements HSSFListener {
     private String checkType(String str, int thisColumn){
         String type = null;
         try {
-            double d = Double.valueOf(str);
+            double d = Double.parseDouble(str);
             try {
-                Double value = new Double(d);
+                Double value = d;
                 double eps = 1e-10;
                 if (value - Math.floor(value) < eps) {
                     type = "LONG";
