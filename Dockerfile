@@ -6,6 +6,8 @@ RUN mkdir -p /opt/apps /opt/dataease/data/feature/full /opt/dataease/drivers
 
 ADD ./run-java.sh /opt/dataease/
 
+RUN chmod +x /opt/dataease/run-java.sh
+
 ADD ./rootPath/dataease.properties /opt/dataease/
 
 ADD mapFiles/* /opt/dataease/data/feature/full/
