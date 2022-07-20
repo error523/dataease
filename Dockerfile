@@ -4,7 +4,9 @@ ARG IMAGE_TAG
 
 RUN mkdir -p /opt/apps /opt/dataease/data/feature/full /opt/dataease/drivers
 
-ADD ./run-java.sh /opt/dataease
+ADD ./run-java.sh /opt/dataease/
+
+ADD ./rootPath/dataease.properties /opt/dataease/
 
 ADD mapFiles/* /opt/dataease/data/feature/full/
 

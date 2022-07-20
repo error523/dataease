@@ -1,3 +1,3 @@
 #/bin/bash
 
-java -jar -DrootPath="D:\workspace\open-fork\dataease\rootPath" -DrootLogFile="D:\workspace\open-fork\dataease\rootPath\dataease.properties" -Dspring.profiles.active=whole
+java -jar -DrootPath="/opt/dataease/" -DrootLogFile="/opt/dataease/dataease.properties" -Dspring.profiles.active=whole
