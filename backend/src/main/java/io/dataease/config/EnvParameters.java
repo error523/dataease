@@ -11,4 +11,7 @@ public class EnvParameters {
     @Value("${rootPath}")
     private String rootPath;
 
+    @Value("${kettlePath}")
+    private String kettlePath;
+
 }

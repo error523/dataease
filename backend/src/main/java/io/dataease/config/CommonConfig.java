@@ -1,5 +1,6 @@
 package io.dataease.config;
 
+import cn.hutool.core.util.StrUtil;
 import io.dataease.commons.utils.CommonThreadPool;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
@@ -19,6 +20,10 @@ public class CommonConfig {
 
     @Resource
     private Environment env; // 保存了配置文件的信息
+
+    @Resource
+    private EnvParameters envParameters;
+
     private static String root_path = "/opt/dataease/data/kettle/";
 
     @Bean
@@ -27,7 +32,7 @@ public class CommonConfig {
         KettleEnvironment.init();
         KettleFileRepository repository = new KettleFileRepository();
         KettleFileRepositoryMeta kettleDatabaseMeta = new KettleFileRepositoryMeta("KettleFileRepository", "repo",
-                "dataease kettle repo", root_path);
+                "dataease kettle repo", StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath());
         repository.init(kettleDatabaseMeta);
         return repository;
     }
