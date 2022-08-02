@@ -4,7 +4,7 @@ ARG IMAGE_TAG
 
 ADD ./java.security /opt/graalvm-ce-java17-22.1.0/conf/security/
 
-RUN mkdir -p /opt/apps /opt/dataease/data/feature/full /opt/dataease/drivers
+RUN mkdir -p /opt/apps /opt/dataease/data/feature/full /opt/dataease/drivers /opt/dataease/kettle
 
 ADD ./run-java.sh /opt/dataease/
 
