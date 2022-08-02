@@ -473,33 +473,36 @@ public class ExtractDataService {
         }
         switch (extractType) {
             case "all_scope":
-                dataFile = StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())) + "." + extention;
+                dataFile = StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())) + "." + extention;
                 script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), System.currentTimeMillis(), separator, columns, "APPEND", dataFile, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())), dataFile);
                 break;
             default:
-                dataFile = StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + TableUtils.addName(TableUtils.tableName(datasetTable.getId())) + "." + extention;
+                dataFile = StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + TableUtils.addName(TableUtils.tableName(datasetTable.getId())) + "." + extention;
                 script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), System.currentTimeMillis(), separator, columns, "APPEND", dataFile, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), dataFile);
                 break;
         }
 
+        if (log.isInfoEnabled()) {
+            log.info("== dataFile is {},  script is {} ==", dataFile, script);
+        }
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(dataFile));
         for (String[] strings : dataList) {
-            String content = "";
+            StringBuilder content = new StringBuilder();
             for (int i = 0; i < strings.length; i++) {
-                content = content + strings[i] + separator;
+                content.append(strings[i]).append(separator);
             }
-            content = content + Md5Utils.md5(content);
-            bw.write(content);
+            content.append(Md5Utils.md5(content.toString()));
+            bw.write(content.toString());
             bw.newLine();
         }
         bw.close();
 
-        File scriptFile = new File(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + datasetTable.getId() + ".sh");
+        File scriptFile = new File(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + datasetTable.getId() + ".sh");
         scriptFile.createNewFile();
         scriptFile.setExecutable(true);
 
-        BufferedWriter scriptFileBw = new BufferedWriter(new FileWriter(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + datasetTable.getId() + ".sh"));
+        BufferedWriter scriptFileBw = new BufferedWriter(new FileWriter(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + datasetTable.getId() + ".sh"));
         scriptFileBw.write("#!/bin/sh");
         scriptFileBw.newLine();
         scriptFileBw.write(script);
@@ -507,7 +510,7 @@ public class ExtractDataService {
         scriptFileBw.close();
 
         try {
-            Process process = Runtime.getRuntime().exec(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + datasetTable.getId() + ".sh");
+            Process process = Runtime.getRuntime().exec(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + datasetTable.getId() + ".sh");
             process.waitFor();
             if (process.waitFor() != 0) {
                 BufferedReader input = new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -523,12 +526,12 @@ public class ExtractDataService {
                 throw new Exception(errMsg.toString());
             }
         } catch (Exception e) {
-            if(log.isErrorEnabled()) {
+            if (log.isErrorEnabled()) {
                 log.error("=== 执行命名失败 {0} ===", e);
             }
             throw e;
         } finally {
-            File deleteFile = new File(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + datasetTable.getId() + ".sh");
+            File deleteFile = new File(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + datasetTable.getId() + ".sh");
             FileUtils.forceDelete(deleteFile);
         }
 
@@ -824,16 +827,16 @@ public class ExtractDataService {
             case "all_scope":
                 outFile = TableUtils.tmpName(TableUtils.tableName(datasetTable.getId()));
                 jobName = "job_" + TableUtils.tableName(datasetTable.getId());
-                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "APPEND", StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())), StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + outFile + "." + extention);
+                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "APPEND", StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())), StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention);
                 break;
             case "incremental_add":
                 outFile = TableUtils.addName(datasetTable.getId());
                 jobName = "job_add_" + TableUtils.tableName(datasetTable.getId());
-                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "APPEND", StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + outFile + "." + extention);
+                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "APPEND", StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention);
                 break;
             case "incremental_delete":
                 outFile = TableUtils.deleteName(TableUtils.tableName(datasetTable.getId()));
-                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "DELETE", StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + outFile + "." + extention);
+                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "DELETE", StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention);
                 jobName = "job_delete_" + TableUtils.tableName(datasetTable.getId());
                 break;
             default:
@@ -880,7 +883,7 @@ public class ExtractDataService {
         jobMeta.addJobHop(greenHop);
 
         String jobXml = jobMeta.getXML();
-        File file = new File(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + jobName + ".kjb");
+        File file = new File(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + jobName + ".kjb");
         FileUtils.writeStringToFile(file, jobXml, "UTF-8");
     }
 
@@ -1017,7 +1020,7 @@ public class ExtractDataService {
         transMeta.addStep(outputStep);
 
         String transXml = transMeta.getXML();
-        File file = new File(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + transName + ".ktr");
+        File file = new File(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + transName + ".ktr");
         FileUtils.writeStringToFile(file, transXml, "UTF-8");
     }
 
@@ -1106,7 +1109,7 @@ public class ExtractDataService {
         TextFileOutputMeta textFileOutputMeta = new TextFileOutputMeta();
         textFileOutputMeta.setEncoding("UTF-8");
         textFileOutputMeta.setHeaderEnabled(false);
-        textFileOutputMeta.setFilename(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + dorisOutputTable);
+        textFileOutputMeta.setFilename(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + dorisOutputTable);
         textFileOutputMeta.setSeparator(separator);
         textFileOutputMeta.setExtension(extention);
 
@@ -1246,9 +1249,9 @@ public class ExtractDataService {
             default:
                 break;
         }
-        deleteFile(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + fileName + "." + extention);
-        deleteFile(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + jobName + ".kjb");
-        deleteFile(StrUtil.isBlankIfStr(envParameters.getKettlePath())? root_path : envParameters.getKettlePath() + transName + ".ktr");
+        deleteFile(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + fileName + "." + extention);
+        deleteFile(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + jobName + ".kjb");
+        deleteFile(StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + transName + ".ktr");
     }
 
     private void deleteExcelFile(DatasetTable datasetTable, List<String> datasetTableIds) {
