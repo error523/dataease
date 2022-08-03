@@ -1,5 +1,6 @@
 package io.dataease.service.engine;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -19,6 +20,7 @@ import io.dataease.plugins.common.request.datasource.DatasourceRequest;
 import io.dataease.plugins.datasource.provider.Provider;
 import io.dataease.provider.ProviderFactory;
 import io.dataease.service.datasource.DatasourceService;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.Cacheable;
@@ -33,6 +35,7 @@ import java.util.regex.Pattern;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
+@Log4j2
 public class EngineService {
     @Resource
     private Environment env;
@@ -173,7 +176,8 @@ public class EngineService {
             jsonObjectMap.put("host", env.getProperty("doris.host", "doris"));
             jsonObjectMap.put("port", env.getProperty("doris.port", "9030"));
             jsonObjectMap.put("httpPort", env.getProperty("doris.httpPort", "8030"));
-
+            System.out.println(JSON.toJSONString(jsonObjectMap));
+            log.info("de-engine config {}", jsonObjectMap);
             DeEngine engine = new DeEngine();
             engine.setId("doris");
             engine.setName("doris");

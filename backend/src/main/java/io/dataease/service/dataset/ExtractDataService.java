@@ -1,5 +1,6 @@
 package io.dataease.service.dataset;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -107,30 +108,34 @@ public class ExtractDataService {
     @Value("${kettle.files.keep:false}")
     private boolean kettleFilesKeep;
 
-    private static final String shellScript = "result=`curl --location-trusted -u %s:%s -H \"label:%s\" -H \"column_separator:%s\" -H \"columns:%s\" -H \"merge_type: %s\" -T %s -XPUT http://%s:%s/api/%s/%s/_stream_load`\n" +
-            "if [ $? -eq 0 ] ; then\n" +
-            "  failstatus=$(echo $result | grep '\"Status\": \"Fail\"')\n" +
-            "  if [ \"x${failstatus}\" != \"x\" ];then" +
-            "     echo $result\n" +
-            "     exit 1\n" +
-            "  fi\n" +
-            "else\n" +
-            "  echo $result\n" +
-            "  exit 1\n" +
-            "fi\n";
+    private static final String shellScript =
+            "chmod 777 %s \n" +
+                    "result=`curl --location-trusted -u %s:%s -H \"label:%s\" -H \"column_separator:%s\" -H \"columns:%s\" -H \"merge_type: %s\" -T %s -XPUT http://%s:%s/api/%s/%s/_stream_load`\n" +
+                    "if [ $? -eq 0 ] ; then\n" +
+                    "  failstatus=$(echo $result | grep '\"Status\": \"Fail\"')\n" +
+                    "  if [ \"x${failstatus}\" != \"x\" ];then" +
+                    "     echo $result\n" +
+                    "     exit 1\n" +
+                    "  fi\n" +
+                    "else\n" +
+                    "  echo $result\n" +
+                    "  exit 1\n" +
+                    "fi\n";
 
-    private static final String shellScriptForDeleteFile = "result=`curl --location-trusted -u %s:%s -H \"label:%s\" -H \"column_separator:%s\" -H \"columns:%s\" -H \"merge_type: %s\" -T %s -XPUT http://%s:%s/api/%s/%s/_stream_load`\n" +
-            "rm -rf  %s \n" +
-            "if [ $? -eq 0 ] ; then\n" +
-            "  failstatus=$(echo $result | grep '\"Status\": \"Fail\"')\n" +
-            "  if [ \"x${failstatus}\" != \"x\" ];then" +
-            "     echo $result\n" +
-            "     exit 1\n" +
-            "  fi\n" +
-            "else\n" +
-            "  echo $result\n" +
-            "  exit 1\n" +
-            "fi\n";
+    private static final String shellScriptForDeleteFile =
+            "chmod 777 %s \n" +
+                    "result=`curl --location-trusted -u %s:%s -H \"label:%s\" -H \"column_separator:%s\" -H \"columns:%s\" -H \"merge_type: %s\" -T %s -XPUT http://%s:%s/api/%s/%s/_stream_load`\n" +
+                    "rm -rf  %s \n" +
+                    "if [ $? -eq 0 ] ; then\n" +
+                    "  failstatus=$(echo $result | grep '\"Status\": \"Fail\"')\n" +
+                    "  if [ \"x${failstatus}\" != \"x\" ];then" +
+                    "     echo $result\n" +
+                    "     exit 1\n" +
+                    "  fi\n" +
+                    "else\n" +
+                    "  echo $result\n" +
+                    "  exit 1\n" +
+                    "fi\n";
 
     public synchronized boolean existSyncTask(String datasetTableId, String datasetTableTaskId, Long startTime) {
         DatasetTable datasetTableRecord = new DatasetTable();
@@ -474,11 +479,11 @@ public class ExtractDataService {
         switch (extractType) {
             case "all_scope":
                 dataFile = StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())) + "." + extention;
-                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), System.currentTimeMillis(), separator, columns, "APPEND", dataFile, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())), dataFile);
+                script = String.format(streamLoadScript, dataFile, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), System.currentTimeMillis(), separator, columns, "APPEND", dataFile, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())), dataFile);
                 break;
             default:
                 dataFile = StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + TableUtils.addName(TableUtils.tableName(datasetTable.getId())) + "." + extention;
-                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), System.currentTimeMillis(), separator, columns, "APPEND", dataFile, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), dataFile);
+                script = String.format(streamLoadScript, dataFile, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), System.currentTimeMillis(), separator, columns, "APPEND", dataFile, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), dataFile);
                 break;
         }
 
@@ -486,7 +491,8 @@ public class ExtractDataService {
             log.info("== dataFile is {},  script is {} ==", dataFile, script);
         }
 
-        BufferedWriter bw = new BufferedWriter(new FileWriter(dataFile));
+        File realDataFile = FileUtil.touch(dataFile);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(realDataFile));
         for (String[] strings : dataList) {
             StringBuilder content = new StringBuilder();
             for (int i = 0; i < strings.length; i++) {
@@ -827,16 +833,16 @@ public class ExtractDataService {
             case "all_scope":
                 outFile = TableUtils.tmpName(TableUtils.tableName(datasetTable.getId()));
                 jobName = "job_" + TableUtils.tableName(datasetTable.getId());
-                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "APPEND", StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())), StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention);
+                script = String.format(streamLoadScript, StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "APPEND", StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tmpName(TableUtils.tableName(datasetTable.getId())), StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention);
                 break;
             case "incremental_add":
                 outFile = TableUtils.addName(datasetTable.getId());
                 jobName = "job_add_" + TableUtils.tableName(datasetTable.getId());
-                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "APPEND", StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention);
+                script = String.format(streamLoadScript, StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "APPEND", StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention);
                 break;
             case "incremental_delete":
                 outFile = TableUtils.deleteName(TableUtils.tableName(datasetTable.getId()));
-                script = String.format(streamLoadScript, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "DELETE", StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention);
+                script = String.format(streamLoadScript, StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getUsername(), dorisConfiguration.getPassword(), datasetTable.getId() + System.currentTimeMillis(), separator, columns, "DELETE", StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention, dorisConfiguration.getHost(), dorisConfiguration.getHttpPort(), dorisConfiguration.getDataBase(), TableUtils.tableName(datasetTable.getId()), StrUtil.isBlankIfStr(envParameters.getKettlePath()) ? root_path : envParameters.getKettlePath() + outFile + "." + extention);
                 jobName = "job_delete_" + TableUtils.tableName(datasetTable.getId());
                 break;
             default:
