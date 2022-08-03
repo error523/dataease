@@ -26,6 +26,6 @@ ENV JAVA_OPTIONS="-Dfile.encoding=utf-8"
 
 ENV APP_VERSION=$IMAGE_TAG
 
-HEALTHCHECK --interval=15s --timeout=5s --retries=20 --start-period=30s CMD curl -f 127.0.0.1:8081
+HEALTHCHECK --interval=15s --timeout=5s --retries=20 --start-period=30s CMD curl -f 127.0.0.1:9081
 
 CMD ["/opt/dataease/run-java.sh"]
